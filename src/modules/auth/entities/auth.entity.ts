@@ -13,7 +13,7 @@ export class Auth {
   id: string;
 
   @Index({ unique: true })
-  @Column({ nullable: false, unique: true })
+  @Column({ nullable: false })
   username: string;
 
   @Column({ nullable: false, unique: true })
