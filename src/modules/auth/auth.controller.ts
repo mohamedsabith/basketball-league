@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/auth.dto';
 
@@ -11,13 +11,8 @@ export class AuthController {
     return this.authService.signup(createAuthDto);
   }
 
-  @Get()
-  findAll() {
+  @Post()
+  login() {
     return 'hello this auth service';
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
   }
 }

@@ -17,6 +17,8 @@ import { AuthModule } from './modules/auth/auth.module';
         POSTGRES_DATABASE: Joi.string().required(),
         PORT: Joi.number().default(3000),
         NODE_ENV: Joi.string().default('development'),
+        JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
       }),
       isGlobal: true,
       envFilePath: '.env',

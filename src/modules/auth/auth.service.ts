@@ -13,13 +13,21 @@ import { PASSWORD_HASH_SALT } from '../../common/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Auth } from './entities/auth.entity';
+import { JwtPayload } from '../auth/interface/jwt-payload.interface';
+import {
+  JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+  JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+} from '../../common/constants';
+import 'dotenv/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Auth)
     private authRepository: Repository<Auth>,
+    private jwtService: JwtService,
   ) {}
 
   //Verify user Password
@@ -29,6 +37,25 @@ export class AuthService {
     if (!(await bcrypt.compare(password, user.password)))
       throw new NotAcceptableException(E_PASSWORD_INCORRECT);
   }
+
+  //Access Token Creation
+  getAccessToken(payload: JwtPayload) {
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      expiresIn: JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+    });
+    return accessToken;
+  }
+
+  //Refresh Token Creation
+  getRefreshToken(payload: JwtPayload) {
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+      expiresIn: JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+    });
+    return refreshToken;
+  }
+
   //Signup
   async signup(createAuthDto: CreateAuthDto) {
     // Check if there is a user with the same email
@@ -45,18 +72,22 @@ export class AuthService {
       PASSWORD_HASH_SALT,
     );
 
+    //User Toekn Creation
+    const accessToken = await this.getAccessToken({
+      username: createAuthDto.username,
+      email: createAuthDto.email,
+    });
+    const refreshToken = await this.getRefreshToken({
+      username: createAuthDto.username,
+      email: createAuthDto.email,
+    });
+
     // Save & return the new user
     return this.authRepository.save({
       ...createAuthDto,
       password: hashedPassword,
+      accessToken,
+      refreshToken,
     });
-  }
-
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
   }
 }

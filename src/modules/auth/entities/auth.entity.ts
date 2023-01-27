@@ -5,17 +5,19 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
 } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Entity('user')
 export class Auth {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index({ unique: true })
   @Column({ nullable: false })
   username: string;
 
+  @Index({ unique: true })
   @Column({ nullable: false, unique: true })
   email: string;
 
@@ -33,4 +35,8 @@ export class Auth {
 
   @UpdateDateColumn({ name: 'updateddate' })
   updateddate: Date;
+
+  @BeforeInsert() async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
 }
