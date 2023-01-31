@@ -7,13 +7,15 @@ import {
   UpdateDateColumn,
   BeforeInsert,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 
 @Entity('user')
-export class Auth {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index({ unique: true })
   @Column({ nullable: false })
   username: string;
 
@@ -27,8 +29,9 @@ export class Auth {
   @Column({ nullable: true })
   last_login?: Date;
 
-  @Column('varchar', { nullable: true })
-  hach_refresh_token: string;
+  @Column({ nullable: false })
+  @Exclude({ toPlainOnly: true })
+  public refresh_token?: string;
 
   @CreateDateColumn({ name: 'createdate' })
   createdate: Date;

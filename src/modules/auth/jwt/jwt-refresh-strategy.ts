@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import { Auth } from '../entities/auth.entity';
+import { User } from '../entities/user.entity';
 import { JwtPayload } from '../interface/jwt-payload.interface';
 import 'dotenv/config';
 
@@ -13,18 +13,19 @@ export class JwtRefreshStrategy extends PassportStrategy(
   'jwt-refresh-token',
 ) {
   constructor(
-    @InjectRepository(Auth)
-    private authRepository: Repository<Auth>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refresh_token'),
+      ignoreExpiration: false,
       secretOrKey: process.env.JWT_REFRESH_TOKEN_SECRET,
     });
   }
 
   async validate(payload: JwtPayload) {
     const { username } = payload;
-    const user = await this.authRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: {
         username,
       },

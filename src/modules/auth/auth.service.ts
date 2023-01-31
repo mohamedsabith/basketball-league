@@ -2,37 +2,40 @@ import {
   Injectable,
   NotAcceptableException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { CreateAuthDto } from './dto/auth.dto';
+import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { SignUpDto } from './dto/signup.dto';
 import {
   E_PASSWORD_INCORRECT,
   E_USER_EMAIL_TAKEN,
   E_USER_NOT_FOUND,
+  E_USER_USERNAME_TAKEN,
 } from '../../common/exceptions';
 import { PASSWORD_HASH_SALT } from '../../common/constants';
-import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { Auth } from './entities/auth.entity';
+import { User } from './entities/user.entity';
 import { JwtPayload } from '../auth/interface/jwt-payload.interface';
 import {
   JWT_ACCESS_TOKEN_EXPIRATION_TIME,
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
 } from '../../common/constants';
 import 'dotenv/config';
+import { SignInDto } from './dto/signin.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(Auth)
-    private authRepository: Repository<Auth>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
 
   //Verify user Password
   async verifyPassword(id: number, password: string) {
-    const user = await this.authRepository.findOneById(id);
+    const user = await this.userRepository.findOneById(id);
     if (!user) throw new NotFoundException(E_USER_NOT_FOUND);
     if (!(await bcrypt.compare(password, user.password)))
       throw new NotAcceptableException(E_PASSWORD_INCORRECT);
@@ -57,37 +60,132 @@ export class AuthService {
   }
 
   //Signup
-  async signup(createAuthDto: CreateAuthDto) {
+  async signup(SignUpDto: SignUpDto) {
     // Check if there is a user with the same email
-    const existingUser = await this.authRepository.findOne({
-      where: { email: createAuthDto.email },
+    const existingMail = await this.userRepository.findOne({
+      where: { email: SignUpDto.email },
     });
-    if (existingUser) {
+    if (existingMail) {
       throw new NotAcceptableException(E_USER_EMAIL_TAKEN);
+    }
+
+    // Check if there is a user with the same username
+    const existingUsername = await this.userRepository.findOne({
+      where: { username: SignUpDto.username },
+    });
+    if (existingUsername) {
+      throw new NotAcceptableException(E_USER_USERNAME_TAKEN);
     }
 
     // Hashing the password: So that they are protected from whoever can access the database.
     const hashedPassword = await bcrypt.hash(
-      createAuthDto.password,
+      SignUpDto.password,
       PASSWORD_HASH_SALT,
     );
 
-    //User Toekn Creation
+    //User Token Creation
     const accessToken = await this.getAccessToken({
-      username: createAuthDto.username,
-      email: createAuthDto.email,
+      username: SignUpDto.username,
+      email: SignUpDto.email,
     });
     const refreshToken = await this.getRefreshToken({
-      username: createAuthDto.username,
-      email: createAuthDto.email,
+      username: SignUpDto.username,
+      email: SignUpDto.email,
     });
 
     // Save & return the new user
-    return this.authRepository.save({
-      ...createAuthDto,
+    return this.userRepository.save({
+      ...SignUpDto,
       password: hashedPassword,
       accessToken,
       refreshToken,
+      refresh_token: await bcrypt.hash(refreshToken, 10),
     });
+  }
+
+  //Login
+  async signIn(
+    signInDto: SignInDto,
+  ): Promise<{ accessToken: string; refreshToken: string; user: JwtPayload }> {
+    const user = await this.userRepository.findOne({
+      where: { email: signInDto.email },
+    });
+
+    if (!user) throw new NotFoundException(E_USER_NOT_FOUND);
+
+    if (!(await bcrypt.compare(signInDto.password, user.password)))
+      throw new NotAcceptableException(E_PASSWORD_INCORRECT);
+
+    const accessToken = await this.getAccessToken({
+      username: user.username,
+      email: user.email,
+    });
+    const refreshToken = await this.getRefreshToken({
+      username: user.username,
+      email: user.email,
+    });
+
+    await this.updateRefreshTokenInUser(refreshToken, user.username);
+
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
+  }
+
+  //logout
+  async signOut(user: User) {
+    await this.updateRefreshTokenInUser(null, user.username);
+  }
+
+  //Update Refresh Token
+  async updateRefreshTokenInUser(refreshToken, username) {
+    if (refreshToken) {
+      refreshToken = await bcrypt.hash(refreshToken, 10);
+    }
+
+    await this.userRepository.update(
+      { username: username },
+      { refresh_token: refreshToken },
+    );
+  }
+
+  async getUserInfoByUsername(username: string) {
+    const auth = await this.userRepository.findOne({ where: { username } });
+    if (auth) {
+      return auth;
+    } else {
+      return null;
+    }
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, username: string) {
+    const user = await this.getUserInfoByUsername(username);
+    console.log(refreshToken);
+    console.log(username);
+    console.log(user);
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.refresh_token,
+    );
+
+    if (isRefreshTokenMatching) {
+      await this.updateRefreshTokenInUser(null, username);
+      return user;
+    } else {
+      throw new UnauthorizedException();
+    }
+  }
+
+  async getNewAccessAndRefreshToken(payload: JwtPayload) {
+    const refreshToken = await this.getRefreshToken(payload);
+    await this.updateRefreshTokenInUser(refreshToken, payload.username);
+
+    return {
+      accessToken: await this.getAccessToken(payload),
+      refreshToken: refreshToken,
+    };
   }
 }

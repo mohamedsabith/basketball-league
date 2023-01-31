@@ -6,7 +6,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-export class CreateAuthDto {
+export class SignUpDto {
   //email
   @IsEmail()
   @IsNotEmpty()
@@ -15,6 +15,9 @@ export class CreateAuthDto {
   @IsNotEmpty()
   @MinLength(8, {
     message: (args: ValidationArguments) => {
+      if (!args.value) {
+        return null;
+      }
       if (args.value.length < 8) {
         return `${args.property} is too short. Minimal length is $constraint1 characters, but actual is ${args.value.length} characters only`;
       }
