@@ -8,7 +8,6 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SignUpDto } from './dto/signup.dto';
 import {
   E_PASSWORD_INCORRECT,
   E_USER_EMAIL_TAKEN,
@@ -21,9 +20,15 @@ import { JwtPayload } from '../auth/interface/jwt-payload.interface';
 import {
   JWT_ACCESS_TOKEN_EXPIRATION_TIME,
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+  JWT_FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME,
 } from '../../common/constants';
+import { MailService } from '../../mail/mail.service';
 import 'dotenv/config';
+//dto
+import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/signin.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +36,7 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   //Verify user Password
@@ -162,9 +168,6 @@ export class AuthService {
 
   async getUserIfRefreshTokenMatches(refreshToken: string, username: string) {
     const user = await this.getUserInfoByUsername(username);
-    console.log(refreshToken);
-    console.log(username);
-    console.log(user);
 
     const isRefreshTokenMatching = await bcrypt.compare(
       refreshToken,
@@ -187,5 +190,45 @@ export class AuthService {
       accessToken: await this.getAccessToken(payload),
       refreshToken: refreshToken,
     };
+  }
+
+  async forgotPassword(forgotPassordDto: ForgotPasswordDto) {
+    // Checking if user exist
+    const user = await this.userRepository.findOne({
+      where: { email: forgotPassordDto.email },
+    });
+
+    if (!user) throw new NotFoundException(E_USER_NOT_FOUND);
+
+    const token = await this.jwtService.sign(
+      { username: user.username, email: user.email, date: Date.now() },
+      {
+        secret: process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET,
+        expiresIn: JWT_FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME,
+      },
+    );
+
+    return await this.mailService.sendMail(
+      user.email,
+      'We received a request to reset your password',
+      './forgot-password',
+      {
+        username: user.username,
+        link: `${process.env.CLIENT_URL}/resetPassword/${token}`,
+      },
+    );
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto, userId: string) {
+    // Hashing the password: So that they are protected from whoever can access the database.
+    const hashedPassword = await bcrypt.hash(
+      resetPasswordDto.password,
+      PASSWORD_HASH_SALT,
+    );
+
+    return await this.userRepository.update(
+      { id: userId },
+      { password: hashedPassword },
+    );
   }
 }

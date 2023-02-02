@@ -7,17 +7,15 @@ export class MailService {
 
   async sendMail(
     email: string,
-    name: string,
-    template: string,
     subject: string,
+    template: string,
     context: any,
   ) {
-    console.log(email);
     await this.mailerService.sendMail({
       to: email,
       subject,
       template,
-      context: { context },
+      context,
     });
   }
 }

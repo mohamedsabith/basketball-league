@@ -1,12 +1,17 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtRefreshTokenGuard } from '../../guards/jwt-refresh-token.guard';
+import { JwtForgotPasswordGuard } from '../../guards/jwt-forgot-password.guard';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/signup.dto';
-import { SignInDto } from './dto/signin.dto';
 import { User } from './entities/user.entity';
 import { GetUser } from './decorator/get-user.decorator';
+
+//dto
+import { SignUpDto } from './dto/signup.dto';
+import { SignInDto } from './dto/signin.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,9 +27,26 @@ export class AuthController {
     return this.authService.signIn(signInDto);
   }
 
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    this.authService.forgotPassword(forgotPasswordDto);
+    return { success: true, msg: 'Message has been sent successfully' };
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtForgotPasswordGuard)
+  @Post('reset-password')
+  resetPassword(
+    @GetUser() user: User,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    this.authService.resetPassword(resetPasswordDto, user.id);
+    return { success: true, msg: 'Password changed successfully' };
+  }
+
   @ApiBearerAuth()
   @UseGuards(JwtRefreshTokenGuard)
-  @Post('/refresh-token')
+  @Post('refresh-token')
   async refreshToken(@GetUser() user: User, @Body() token: RefreshTokenDto) {
     const user_info = await this.authService.getUserIfRefreshTokenMatches(
       token.refresh_token,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './config/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailService } from './mail/mail.service';
+import { LoggerMiddleware } from './middleware/logger';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MailService } from './mail/mail.service';
         NODE_ENV: Joi.string().default('development'),
         JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        JWT_FORGOT_PASSWORD_TOKEN_SECRET: Joi.string().required(),
         GOOGLE_APP_EMAIL: Joi.string().required(),
         GOOGLE_APP_PASS: Joi.string().required(),
       }),
@@ -43,7 +45,7 @@ import { MailService } from './mail/mail.service';
           from: configService.get('GOOGLE_APP_EMAIL'),
         },
         template: {
-          dir: join(__dirname, './templates'),
+          dir: join(__dirname, 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
@@ -58,4 +60,8 @@ import { MailService } from './mail/mail.service';
   controllers: [AppController],
   providers: [AppService, MailService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

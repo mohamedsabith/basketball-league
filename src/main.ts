@@ -3,8 +3,17 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import {
+  appendRequestIdToLogger,
+  LoggingInterceptor,
+  morganRequestLogger,
+  morganResponseLogger,
+  appendIdToRequest,
+} from 'nestjs-winston-logger';
+import { globalLogger } from './common/winston-logger';
 import { E_TOO_MANY_REQUESTS } from './common/exceptions';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/exceptionFilters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -46,6 +55,18 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useLogger(globalLogger);
+
+  // append id to identify request
+  app.use(appendIdToRequest);
+  app.use(appendRequestIdToLogger(globalLogger));
+
+  app.use(morganRequestLogger(globalLogger));
+  app.use(morganResponseLogger(globalLogger));
+
+  app.useGlobalInterceptors(new LoggingInterceptor(globalLogger));
 
   // Port
   const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
