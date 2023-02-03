@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
 import {
   appendRequestIdToLogger,
   LoggingInterceptor,
@@ -10,10 +11,12 @@ import {
   morganResponseLogger,
   appendIdToRequest,
 } from 'nestjs-winston-logger';
-import { globalLogger } from './common/winston-logger';
-import { E_TOO_MANY_REQUESTS } from './common/exceptions';
+import {
+  E_TOO_MANY_REQUESTS,
+  HttpExceptionFilter,
+  globalLogger,
+} from './common';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/exceptionFilters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +30,15 @@ async function bootstrap() {
   app.enableCors({
     origin: false,
   });
+
+  app.use(bodyParser.json({ limit: '30mb' }));
+  app.use(
+    bodyParser.urlencoded({
+      limit: '30mb',
+      extended: true,
+      parameterLimit: 2000,
+    }),
+  );
 
   // -- Rate limiting: Limits the number of requests from the same IP in a period of time.
   app.use(
@@ -59,7 +71,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useLogger(globalLogger);
 
-  // append id to identify request
+  //append id to identify request
   app.use(appendIdToRequest);
   app.use(appendRequestIdToLogger(globalLogger));
 

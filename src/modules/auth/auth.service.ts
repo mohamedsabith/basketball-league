@@ -13,15 +13,13 @@ import {
   E_USER_EMAIL_TAKEN,
   E_USER_NOT_FOUND,
   E_USER_USERNAME_TAKEN,
-} from '../../common/exceptions';
-import { PASSWORD_HASH_SALT } from '../../common/constants';
-import { User } from './entities/user.entity';
-import { JwtPayload } from '../auth/interface/jwt-payload.interface';
-import {
+  PASSWORD_HASH_SALT,
   JWT_ACCESS_TOKEN_EXPIRATION_TIME,
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
   JWT_FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME,
-} from '../../common/constants';
+} from '../../common';
+import { User } from './entities/user.entity';
+import { JwtPayload } from '../auth/interface/jwt-payload.interface';
 import { MailService } from '../../mail/mail.service';
 import 'dotenv/config';
 //dto

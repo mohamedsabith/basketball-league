@@ -15,10 +15,25 @@ export const globalLogger = new NestjsWinstonLoggerService({
     ),
   ),
   transports: [
-    new transports.File({ filename: 'logs/error.log', level: 'error' }),
     new transports.File({
-      filename: 'logs/combined.log',
-      handleExceptions: true,
+      filename: 'src/logs/info.log',
+      level: 'info',
+    }),
+    new transports.File({
+      filename: 'src/logs/error.log',
+      level: 'error',
+    }),
+    new transports.File({
+      filename: 'src/logs/warn.log',
+      level: 'warn',
+    }),
+    new transports.File({
+      filename: 'src/logs/debug.log',
+      level: 'debug',
+    }),
+    new transports.File({
+      filename: 'src/logs/verbose.log',
+      level: 'verbose',
     }),
     new transports.Console(),
   ],

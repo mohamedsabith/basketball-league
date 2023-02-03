@@ -9,7 +9,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './config/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailService } from './mail/mail.service';
-import { LoggerMiddleware } from './middleware/logger';
+import { LoggerMiddleware } from './common';
 
 @Module({
   imports: [
