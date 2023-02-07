@@ -10,6 +10,8 @@ import { DatabaseModule } from './config/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailService } from './mail/mail.service';
 import { LoggerMiddleware } from './common';
+import { PlayerModule } from './modules/player/player.module';
+import { LeagueAdminModule } from './modules/league-admin/league-admin.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { LoggerMiddleware } from './common';
     }),
     DatabaseModule,
     AuthModule,
+    PlayerModule,
+    LeagueAdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],

@@ -4,6 +4,7 @@ import { rateLimit } from 'express-rate-limit';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import {
   appendRequestIdToLogger,
   LoggingInterceptor,
@@ -15,6 +16,9 @@ import {
   E_TOO_MANY_REQUESTS,
   HttpExceptionFilter,
   globalLogger,
+  APP_NAME,
+  APP_DESCRIPTION,
+  APP_VERSION,
 } from './common';
 import { AppModule } from './app.module';
 
@@ -79,6 +83,18 @@ async function bootstrap() {
   app.use(morganResponseLogger(globalLogger));
 
   app.useGlobalInterceptors(new LoggingInterceptor(globalLogger));
+
+  const options = new DocumentBuilder()
+    .setTitle(APP_NAME)
+    .setVersion(APP_VERSION)
+    .setDescription(APP_DESCRIPTION)
+    .setExternalDoc('For more information', 'http://swagger.io')
+    .addBearerAuth()
+    .addTag('mohamedsabith', 'developer')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('api', app, document);
 
   // Port
   const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;

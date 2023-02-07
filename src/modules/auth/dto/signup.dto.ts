@@ -1,34 +1,75 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsNumber,
   IsNotEmpty,
   MinLength,
+  IsDefined,
   MaxLength,
-  ValidationArguments,
+  IsEnum,
+  IsOptional,
+  ValidateIf,
 } from 'class-validator';
-
+import { UserRole, Gender } from 'src/common';
 export class SignUpDto {
   //email
+  @IsDefined()
   @IsEmail()
   @IsNotEmpty()
+  @ApiProperty()
   email: string;
   //password
-  @IsNotEmpty()
+  @IsDefined()
+  @IsNotEmpty({ message: 'password should not be empty' })
+  @ApiProperty()
   @MinLength(8, {
-    message: (args: ValidationArguments) => {
-      if (!args.value) {
-        return null;
-      }
-      if (args.value.length < 8) {
-        return `${args.property} is too short. Minimal length is $constraint1 characters, but actual is ${args.value.length} characters only`;
-      }
-    },
+    message: 'password is too short. Minimal length is 8 characters',
   })
   @MaxLength(20, {
-    message:
-      'Password is too long. Maximal length is $constraint1 characters, but actual is $value',
+    message: 'Password is too long. Maximal length is20 characters',
   })
   password: string;
-  //username
+
   @IsNotEmpty()
+  @IsDefined()
+  @ApiProperty()
   username: string;
+
+  @IsNotEmpty()
+  @IsEnum(UserRole)
+  @IsDefined()
+  @ApiProperty()
+  role: UserRole;
+
+  @ValidateIf((val) => val.role === UserRole.PLAYER)
+  @IsNumber()
+  @IsNotEmpty()
+  @IsDefined()
+  @ApiProperty()
+  height: number;
+
+  @ValidateIf((val) => val.role === UserRole.PLAYER)
+  @IsNotEmpty()
+  @IsDefined()
+  @IsNumber()
+  @ApiProperty()
+  weight: number;
+
+  @ValidateIf((val) => val.role === UserRole.PLAYER)
+  @IsOptional()
+  @IsDefined()
+  @ApiProperty()
+  @IsNumber()
+  zipcode: number;
+
+  @ValidateIf((val) => val.role === UserRole.PLAYER)
+  @IsOptional()
+  @IsDefined()
+  @ApiProperty()
+  school: string;
+
+  @IsEnum(Gender)
+  @IsOptional()
+  @ApiProperty()
+  gender: Gender;
 }

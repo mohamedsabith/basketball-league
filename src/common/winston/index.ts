@@ -37,4 +37,5 @@ export const globalLogger = new NestjsWinstonLoggerService({
     }),
     new transports.Console(),
   ],
+  exitOnError: false,
 });

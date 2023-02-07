@@ -3,30 +3,26 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  ValidationArguments,
+  IsDefined,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SignInDto {
   //email
+  @IsDefined()
+  @ApiProperty()
   @IsEmail()
   @IsNotEmpty()
   email: string;
   //password
+  @IsDefined()
+  @ApiProperty()
   @IsNotEmpty()
   @MinLength(8, {
-    message: (args: ValidationArguments) => {
-      if (!args.value) {
-        return null;
-      }
-
-      if (args.value.length < 8) {
-        return `${args.property} is too short. Minimal length is $constraint1 characters, but actual is ${args.value.length} characters only`;
-      }
-    },
+    message: 'password is too short. Minimal length is 8 characters',
   })
   @MaxLength(20, {
-    message:
-      'Password is too long. Maximal length is $constraint1 characters, but actual is $value',
+    message: 'Password is too long. Maximal length is20 characters',
   })
   password: string;
 }

@@ -17,9 +17,11 @@ import {
   JWT_ACCESS_TOKEN_EXPIRATION_TIME,
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
   JWT_FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME,
+  UserRole,
 } from '../../common';
 import { User } from './entities/user.entity';
-import { JwtPayload } from '../auth/interface/jwt-payload.interface';
+import { Player } from '../player/entities/player.entity';
+import { JwtPayload } from './interface/jwt-payload.interface';
 import { MailService } from '../../mail/mail.service';
 import 'dotenv/config';
 //dto
@@ -33,6 +35,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Player)
+    private playerRepository: Repository<Player>,
     private jwtService: JwtService,
     private readonly mailService: MailService,
   ) {}
@@ -98,13 +102,26 @@ export class AuthService {
     });
 
     // Save & return the new user
-    return this.userRepository.save({
+    const newUser = await this.userRepository.save({
       ...SignUpDto,
       password: hashedPassword,
-      accessToken,
-      refreshToken,
       refresh_token: await bcrypt.hash(refreshToken, 10),
     });
+
+    const { height, weight, school, zipcode } = SignUpDto;
+
+    if (newUser.role === UserRole.PLAYER) {
+      return this.playerRepository.save({
+        ...newUser,
+        user_id: newUser.id,
+        height,
+        weight,
+        school,
+        zipcode,
+        accessToken,
+        refreshToken,
+      });
+    }
   }
 
   //Login
@@ -173,7 +190,7 @@ export class AuthService {
     );
 
     if (isRefreshTokenMatching) {
-      await this.updateRefreshTokenInUser(null, username);
+      await this.updateRefreshTokenInUser(refreshToken, username);
       return user;
     } else {
       throw new UnauthorizedException();

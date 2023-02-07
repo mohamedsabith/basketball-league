@@ -5,16 +5,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { MailService } from '../../mail/mail.service';
 import { AuthController } from './auth.controller';
+
 import { User } from './entities/user.entity';
+import { Player } from '../player/entities/player.entity';
 
 //jet strategy
-import { JwtStrategy } from '../auth/jwt/jwt-strategy';
-import { JwtRefreshStrategy } from '../auth/jwt/jwt-refresh-strategy';
-import { JwtForgotPasswordStrategy } from '../auth/jwt/jwt-forgot-password-strategy';
+import { JwtStrategy } from './jwt/jwt-strategy';
+import { JwtRefreshStrategy } from './jwt/jwt-refresh-strategy';
+import { JwtForgotPasswordStrategy } from './jwt/jwt-forgot-password-strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Player]),
     PassportModule.register({}),
     JwtModule.register({}),
   ],

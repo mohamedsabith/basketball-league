@@ -1,5 +1,4 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtRefreshTokenGuard } from '../../guards/jwt-refresh-token.guard';
 import { JwtForgotPasswordGuard } from '../../guards/jwt-forgot-password.guard';
 import { AuthService } from './auth.service';
@@ -33,7 +32,6 @@ export class AuthController {
     return { success: true, msg: 'Message has been sent successfully' };
   }
 
-  @ApiBearerAuth()
   @UseGuards(JwtForgotPasswordGuard)
   @Post('reset-password')
   resetPassword(
@@ -44,7 +42,6 @@ export class AuthController {
     return { success: true, msg: 'Password changed successfully' };
   }
 
-  @ApiBearerAuth()
   @UseGuards(JwtRefreshTokenGuard)
   @Post('refresh-token')
   async refreshToken(@GetUser() user: User, @Body() token: RefreshTokenDto) {
