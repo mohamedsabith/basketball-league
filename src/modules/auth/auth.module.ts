@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 
 import { User } from './entities/user.entity';
 import { Player } from '../player/entities/player.entity';
+import { LeagueAdmin } from '../league-admin/entities/league-admin.entity';
 
 //jet strategy
 import { JwtStrategy } from './jwt/jwt-strategy';
@@ -16,7 +17,7 @@ import { JwtForgotPasswordStrategy } from './jwt/jwt-forgot-password-strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Player]),
+    TypeOrmModule.forFeature([User, Player, LeagueAdmin]),
     PassportModule.register({}),
     JwtModule.register({}),
   ],

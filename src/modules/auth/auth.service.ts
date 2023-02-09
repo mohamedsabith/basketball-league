@@ -19,8 +19,11 @@ import {
   JWT_FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME,
   UserRole,
 } from '../../common';
+
 import { User } from './entities/user.entity';
 import { Player } from '../player/entities/player.entity';
+import { LeagueAdmin } from '../league-admin/entities/league-admin.entity';
+
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { MailService } from '../../mail/mail.service';
 import 'dotenv/config';
@@ -37,6 +40,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(Player)
     private playerRepository: Repository<Player>,
+    @InjectRepository(LeagueAdmin)
+    private leagueAdminRepository: Repository<LeagueAdmin>,
     private jwtService: JwtService,
     private readonly mailService: MailService,
   ) {}
@@ -92,13 +97,15 @@ export class AuthService {
     );
 
     //User Token Creation
-    const accessToken = await this.getAccessToken({
+    const accessToken = this.getAccessToken({
       username: SignUpDto.username,
       email: SignUpDto.email,
+      role: SignUpDto.role,
     });
     const refreshToken = await this.getRefreshToken({
       username: SignUpDto.username,
       email: SignUpDto.email,
+      role: SignUpDto.role,
     });
 
     // Save & return the new user
@@ -112,12 +119,20 @@ export class AuthService {
 
     if (newUser.role === UserRole.PLAYER) {
       return this.playerRepository.save({
-        ...newUser,
+        playerDetails: newUser,
         user_id: newUser.id,
         height,
         weight,
         school,
         zipcode,
+        accessToken,
+        refreshToken,
+      });
+    }
+
+    if (newUser.role === UserRole.LEAGUEADMIN) {
+      return this.leagueAdminRepository.save({
+        leagueAdminDetails: newUser,
         accessToken,
         refreshToken,
       });
@@ -140,10 +155,12 @@ export class AuthService {
     const accessToken = await this.getAccessToken({
       username: user.username,
       email: user.email,
+      role: user.role,
     });
     const refreshToken = await this.getRefreshToken({
       username: user.username,
       email: user.email,
+      role: user.role,
     });
 
     await this.updateRefreshTokenInUser(refreshToken, user.username);

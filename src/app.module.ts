@@ -12,6 +12,7 @@ import { MailService } from './mail/mail.service';
 import { LoggerMiddleware } from './common';
 import { PlayerModule } from './modules/player/player.module';
 import { LeagueAdminModule } from './modules/league-admin/league-admin.module';
+import { SuperadminModule } from './modules/superadmin/superadmin.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { LeagueAdminModule } from './modules/league-admin/league-admin.module';
     AuthModule,
     PlayerModule,
     LeagueAdminModule,
+    SuperadminModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],

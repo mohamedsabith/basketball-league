@@ -3,7 +3,7 @@ import { JwtRefreshTokenGuard } from '../../guards/jwt-refresh-token.guard';
 import { JwtForgotPasswordGuard } from '../../guards/jwt-forgot-password.guard';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
-import { GetUser } from './decorator/get-user.decorator';
+import { GetUser } from '../../common/decorator/get-user.decorator';
 
 //dto
 import { SignUpDto } from './dto/signup.dto';
@@ -53,6 +53,7 @@ export class AuthController {
       const userInfo = {
         username: user_info.username,
         email: user_info.email,
+        role: user_info.role,
       };
 
       return this.authService.getNewAccessAndRefreshToken(userInfo);

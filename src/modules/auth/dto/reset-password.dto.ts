@@ -6,7 +6,7 @@ import {
   IsDefined,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Match } from '../decorator/match.decorator';
+import { Match } from '../../../common/decorator/match.decorator';
 
 export class ResetPasswordDto {
   //password

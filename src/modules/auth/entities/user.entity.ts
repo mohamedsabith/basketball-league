@@ -6,9 +6,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BeforeInsert,
-  ManyToOne,
+  OneToOne,
 } from 'typeorm';
 import { Player } from '../../player/entities/player.entity';
+import { LeagueAdmin } from 'src/modules/league-admin/entities/league-admin.entity';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { Gender, UserRole } from 'src/common';
@@ -50,7 +51,21 @@ export class User {
   })
   role: UserRole;
 
-  @ManyToOne(() => Player, (player) => player.user_id) userDetails: Player;
+  @OneToOne(() => Player, (player) => player.playerDetails, {
+    eager: true,
+    cascade: true,
+  })
+  playerDetails: Player;
+
+  @OneToOne(
+    () => LeagueAdmin,
+    (leagueAdmin) => leagueAdmin.leagueAdminDetails,
+    {
+      eager: true,
+      cascade: true,
+    },
+  )
+  leagueAdminDetails: LeagueAdmin;
 
   @CreateDateColumn({ name: 'createdate' })
   createdate: Date;

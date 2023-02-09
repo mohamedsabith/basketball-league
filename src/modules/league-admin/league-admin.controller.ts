@@ -1,34 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { LeagueAdminService } from './league-admin.service';
-import { CreateLeagueAdminDto } from './dto/create-league-admin.dto';
-import { UpdateLeagueAdminDto } from './dto/update-league-admin.dto';
+import { CreateLeagueDto } from './dto/create-league.dto';
+import { JwtAuthenticationGuard } from 'src/guards/jwt-authentication.guard';
+import { UserRole } from 'src/common';
+import { Roles } from 'src/common/decorator/roles.decorator';
+import { RolesGuard } from '../../guards/roles.guard';
 
 @Controller('league-admin')
 export class LeagueAdminController {
   constructor(private readonly leagueAdminService: LeagueAdminService) {}
 
-  @Post()
-  create(@Body() createLeagueAdminDto: CreateLeagueAdminDto) {
-    return this.leagueAdminService.create(createLeagueAdminDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.leagueAdminService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.leagueAdminService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLeagueAdminDto: UpdateLeagueAdminDto) {
-    return this.leagueAdminService.update(+id, updateLeagueAdminDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.leagueAdminService.remove(+id);
+  @Post('league')
+  @Roles(UserRole.LEAGUEADMIN)
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  createLeague(@Body() createLeagueDto: CreateLeagueDto) {
+    return this.leagueAdminService.leagueCreate(createLeagueDto);
   }
 }

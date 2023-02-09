@@ -4,15 +4,15 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
+import { User } from 'src/modules/auth/entities/user.entity';
 
 @Entity('player')
 export class Player {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ nullable: false })
-  user_id: string;
 
   @Column({ nullable: false })
   height: number;
@@ -25,6 +25,10 @@ export class Player {
 
   @Column({ nullable: true })
   zipcode: number;
+
+  @OneToOne(() => User)
+  @JoinColumn()
+  playerDetails: User;
 
   @CreateDateColumn({ name: 'createdate' })
   createdate: Date;
