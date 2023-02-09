@@ -3,7 +3,7 @@ import { JwtRefreshTokenGuard } from '../../guards/jwt-refresh-token.guard';
 import { JwtForgotPasswordGuard } from '../../guards/jwt-forgot-password.guard';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
-import { GetUser } from '../../common/decorator/get-user.decorator';
+import { GetUser } from '../../common';
 
 //dto
 import { SignUpDto } from './dto/signup.dto';

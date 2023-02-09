@@ -3,7 +3,7 @@ import { LeagueAdminService } from './league-admin.service';
 import { CreateLeagueDto } from './dto/create-league.dto';
 import { JwtAuthenticationGuard } from 'src/guards/jwt-authentication.guard';
 import { UserRole } from 'src/common';
-import { Roles } from 'src/common/decorator/roles.decorator';
+import { Roles } from 'src/common';
 import { RolesGuard } from '../../guards/roles.guard';
 
 @Controller('league-admin')
