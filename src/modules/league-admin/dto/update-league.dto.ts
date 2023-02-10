@@ -1,18 +1,26 @@
 import {
-  IsNotEmpty,
   IsString,
   IsOptional,
   IsDate,
   MinDate,
   IsNumber,
+  IsNotEmpty,
+  IsUUID,
   IsMilitaryTime,
   Contains,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateLeagueDto {
+export class LeagueParamDto {
   @IsNotEmpty()
+  @ApiProperty()
+  @IsUUID()
+  id: string;
+}
+
+export class UpdateLeagueDto {
+  @IsOptional()
   @ApiProperty()
   @IsString()
   name: string;
@@ -22,7 +30,7 @@ export class CreateLeagueDto {
   @IsString()
   image: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @Transform(({ value }) => value && new Date(value))
   @IsDate({
     message:
@@ -33,7 +41,7 @@ export class CreateLeagueDto {
   date: Date;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     pattern: 'HH:mm',
     example: '23:00',
@@ -45,17 +53,17 @@ export class CreateLeagueDto {
   @Contains(':', { message: "Time must contain ':' in format HH:MM" })
   time: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   @IsNumber()
   entryFee: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   @IsNumber()
   duration: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   @IsString()
   details: string;

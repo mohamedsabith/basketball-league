@@ -28,13 +28,16 @@ export class League {
   date: Date;
 
   @Column({ nullable: false })
-  time: Date;
+  time: string;
+
+  @Column({ nullable: false })
+  duration: number;
 
   @Column({ nullable: false })
   entry_fee: number;
 
   @Column({ nullable: false })
-  details: number;
+  details: string;
 
   @Column({ type: 'enum', enum: LeagueStatus, default: LeagueStatus.PENDING })
   status: LeagueStatus;
