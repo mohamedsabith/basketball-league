@@ -47,7 +47,7 @@ export class CreateLeagueDto {
   @IsNotEmpty()
   @ApiProperty()
   @IsNumber()
-  entryFee: number;
+  entry_fee: number;
 
   @IsNotEmpty()
   @ApiProperty()

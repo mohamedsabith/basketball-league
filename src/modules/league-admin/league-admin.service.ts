@@ -31,10 +31,14 @@ export class LeagueAdminService {
     const leagueAdmin = await this.userRepository.findOne({ where: { email } });
 
     if (leagueAdmin.leagueAdminDetails.status === LeagueStatus.APPROVED) {
-      const imageUrl = await this.clodinaryService.uploadImage(file);
+      if (file) {
+        const imageUrl = await this.clodinaryService.uploadImage(file);
+        return await this.leagueRepository.save({
+          image: imageUrl.secure_url,
+          ...createLeagueDto,
+        });
+      }
       return await this.leagueRepository.save({
-        entry_fee: createLeagueDto.entryFee,
-        image: imageUrl.secure_url,
         ...createLeagueDto,
       });
     }
@@ -46,7 +50,21 @@ export class LeagueAdminService {
     return await this.leagueRepository.findOne({ where: { name: league } });
   }
 
-  async leagueUpdate(id: string, updateLeagueDto: UpdateLeagueDto) {
+  async leagueUpdate(
+    id: string,
+    file: Express.Multer.File,
+    updateLeagueDto: UpdateLeagueDto,
+  ) {
+    if (file) {
+      const imageUrl = await this.clodinaryService.uploadImage(file);
+      return await this.leagueRepository.update(
+        { id: id },
+        {
+          ...updateLeagueDto,
+          image: imageUrl.secure_url,
+        },
+      );
+    }
     return await this.leagueRepository.update(
       { id: id },
       { ...updateLeagueDto },

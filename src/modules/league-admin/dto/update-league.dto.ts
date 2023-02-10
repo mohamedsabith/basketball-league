@@ -55,7 +55,7 @@ export class UpdateLeagueDto {
   @IsOptional()
   @ApiProperty()
   @IsNumber()
-  entryFee: number;
+  entry_fee: number;
 
   @IsOptional()
   @ApiProperty()

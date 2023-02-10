@@ -12,6 +12,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Optional,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { LeagueAdminService } from './league-admin.service';
@@ -38,6 +39,7 @@ export class LeagueAdminController {
     @Req() req,
     @UploadedFile(
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
           new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
@@ -61,8 +63,10 @@ export class LeagueAdminController {
   updateLeague(
     @Param()
     id: LeagueParamDto,
+    @Optional()
     @UploadedFile(
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({ maxSize: 5242880 }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
@@ -72,9 +76,7 @@ export class LeagueAdminController {
     file: Express.Multer.File,
     @Body() updateLeagueDto: UpdateLeagueDto,
   ) {
-    console.log(file);
-
-    return this.leagueAdminService.leagueUpdate(id.id, updateLeagueDto);
+    return this.leagueAdminService.leagueUpdate(id.id, file, updateLeagueDto);
   }
 
   @ApiBearerAuth()
