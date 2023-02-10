@@ -17,10 +17,9 @@ export class CreateLeagueDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ format: 'binary' })
+  @ApiProperty({ type: 'string', format: 'binary' })
   @IsOptional()
-  @IsString()
-  image: string;
+  image: any;
 
   @IsNotEmpty()
   @Transform(({ value }) => value && new Date(value))

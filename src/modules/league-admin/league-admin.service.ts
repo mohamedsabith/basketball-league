@@ -2,27 +2,44 @@ import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { League } from './entities/league.entity';
-import { LEAGUE_NAME_TAKEN, LEAGUE_NOT_FOUND } from 'src/common';
+import { User } from '../auth/entities/user.entity';
+import { LEAGUE_NAME_TAKEN, LEAGUE_NOT_FOUND, LeagueStatus } from 'src/common';
 import { CreateLeagueDto } from './dto/create-league.dto';
 import { UpdateLeagueDto } from './dto/update-league.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class LeagueAdminService {
   constructor(
     @InjectRepository(League)
     private leagueRepository: Repository<League>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private clodinaryService: CloudinaryService,
   ) {}
 
-  async leagueCreate(createLeagueDto: CreateLeagueDto) {
+  async leagueCreate(
+    email: string,
+    file: Express.Multer.File,
+    createLeagueDto: CreateLeagueDto,
+  ) {
     //league existing
-    if (this.getLeagueByName(createLeagueDto.name)) {
+    if (await this.getLeagueByName(createLeagueDto.name)) {
       throw new NotAcceptableException(LEAGUE_NAME_TAKEN);
     }
 
-    return await this.leagueRepository.save({
-      entry_fee: createLeagueDto.entryFee,
-      ...createLeagueDto,
-    });
+    const leagueAdmin = await this.userRepository.findOne({ where: { email } });
+
+    if (leagueAdmin.leagueAdminDetails.status === LeagueStatus.APPROVED) {
+      const imageUrl = await this.clodinaryService.uploadImage(file);
+      return await this.leagueRepository.save({
+        entry_fee: createLeagueDto.entryFee,
+        image: imageUrl.secure_url,
+        ...createLeagueDto,
+      });
+    }
+
+    throw new NotAcceptableException('you are not authorized to create league');
   }
 
   async getLeagueByName(league: string) {

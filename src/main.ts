@@ -4,6 +4,7 @@ import { rateLimit } from 'express-rate-limit';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
+import * as dotenv from 'dotenv';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import {
   appendRequestIdToLogger,
@@ -21,6 +22,7 @@ import {
   APP_VERSION,
 } from './common';
 import { AppModule } from './app.module';
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

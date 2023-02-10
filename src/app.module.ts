@@ -13,6 +13,7 @@ import { LoggerMiddleware } from './common';
 import { PlayerModule } from './modules/player/player.module';
 import { LeagueAdminModule } from './modules/league-admin/league-admin.module';
 import { SuperadminModule } from './modules/superadmin/superadmin.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { SuperadminModule } from './modules/superadmin/superadmin.module';
     PlayerModule,
     LeagueAdminModule,
     SuperadminModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],

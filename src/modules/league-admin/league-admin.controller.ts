@@ -4,10 +4,16 @@ import {
   Body,
   UseGuards,
   Param,
+  Req,
   Delete,
   Get,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { LeagueAdminService } from './league-admin.service';
 
 import { CreateLeagueDto } from './dto/create-league.dto';
@@ -16,6 +22,7 @@ import { UpdateLeagueDto, LeagueParamDto } from './dto/update-league.dto';
 import { JwtAuthenticationGuard } from 'src/guards/jwt-authentication.guard';
 import { UserRole, Roles } from 'src/common';
 import { RolesGuard } from '../../guards/roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('league-admin')
 export class LeagueAdminController {
@@ -25,19 +32,48 @@ export class LeagueAdminController {
   @Post('league')
   @Roles(UserRole.LEAGUEADMIN)
   @UseGuards(JwtAuthenticationGuard, RolesGuard)
-  createLeague(@Body() createLeagueDto: CreateLeagueDto) {
-    return this.leagueAdminService.leagueCreate(createLeagueDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  createLeague(
+    @Req() req,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Body() createLeagueDto: CreateLeagueDto,
+  ) {
+    const { email } = req.user;
+
+    return this.leagueAdminService.leagueCreate(email, file, createLeagueDto);
   }
 
   @ApiBearerAuth()
   @Post('league/:id')
   @Roles(UserRole.LEAGUEADMIN)
   @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   updateLeague(
     @Param()
     id: LeagueParamDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5242880 }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
     @Body() updateLeagueDto: UpdateLeagueDto,
   ) {
+    console.log(file);
+
     return this.leagueAdminService.leagueUpdate(id.id, updateLeagueDto);
   }
 
