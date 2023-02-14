@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from 'src/modules/auth/entities/user.entity';
+import { Status } from 'src/common';
 
 @Entity('player')
 export class Player {
@@ -29,6 +30,9 @@ export class Player {
   @OneToOne(() => User)
   @JoinColumn()
   playerDetails: User;
+
+  @Column({ type: 'enum', enum: Status, default: Status.PENDING })
+  status: Status;
 
   @CreateDateColumn({ name: 'createdate' })
   createdate: Date;

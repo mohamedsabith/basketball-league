@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 import { PlayerService } from './player.service';
 
 @Controller('player')
@@ -8,10 +8,5 @@ export class PlayerController {
   @Post()
   create() {
     return this.playerService.create();
-  }
-
-  @Get()
-  findAll() {
-    return this.playerService.findAll();
   }
 }

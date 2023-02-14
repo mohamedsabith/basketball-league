@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { LeagueStatus } from 'src/common';
+import { Status } from 'src/common';
 
 @Entity('league')
 export class League {
@@ -39,8 +39,8 @@ export class League {
   @Column({ nullable: false })
   details: string;
 
-  @Column({ type: 'enum', enum: LeagueStatus, default: LeagueStatus.PENDING })
-  status: LeagueStatus;
+  @Column({ type: 'enum', enum: Status, default: Status.PENDING })
+  status: Status;
 
   @CreateDateColumn({ name: 'createdate' })
   createdate: Date;

@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { League } from './entities/league.entity';
 import { User } from '../auth/entities/user.entity';
-import { LEAGUE_NAME_TAKEN, LEAGUE_NOT_FOUND, LeagueStatus } from 'src/common';
+import { LEAGUE_NAME_TAKEN, LEAGUE_NOT_FOUND, Status } from 'src/common';
 import { CreateLeagueDto } from './dto/create-league.dto';
 import { UpdateLeagueDto } from './dto/update-league.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -30,7 +30,7 @@ export class LeagueAdminService {
 
     const leagueAdmin = await this.userRepository.findOne({ where: { email } });
 
-    if (leagueAdmin.leagueAdminDetails.status === LeagueStatus.APPROVED) {
+    if (leagueAdmin.leagueAdminDetails.status === Status.APPROVED) {
       if (file) {
         const imageUrl = await this.clodinaryService.uploadImage(file);
         return await this.leagueRepository.save({
