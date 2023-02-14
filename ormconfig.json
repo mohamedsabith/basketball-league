@@ -1,0 +1,18 @@
+{
+  "type": "postgres",
+  "logging": "true",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "12345678",
+  "database": "nestLearning",
+  "autoLoadEntities": true,
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "factories": ["dist/**/database/factories/**/*.js"],
+  "seeds": ["dist/**/database/seeds/**/*.js"],
+  "migrations": ["migration/*.js"],
+  "cli": {
+    "migrationsDir": "migration"
+  },
+  "synchronize": true
+}
