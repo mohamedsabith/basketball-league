@@ -25,7 +25,7 @@ import { UserRole, Roles } from 'src/common';
 import { RolesGuard } from '../../guards/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('league-admin')
+@Controller('leagueadmin')
 export class LeagueAdminController {
   constructor(private readonly leagueAdminService: LeagueAdminService) {}
 

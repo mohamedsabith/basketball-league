@@ -1,28 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsNotEmpty, IsDefined, IsOptional } from 'class-validator';
-export class SignUpDto {
+
+export class CreateCourtDto {
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
   name: string;
 
-  @ApiProperty({ type: 'string', format: 'binary' })
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
   @IsOptional()
   image: any;
 
-  @ApiProperty({ type: 'array', format: 'binary' })
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    required: false,
+  })
   @IsOptional()
-  thump_image: any;
+  thumb_image: any;
 
   @IsNotEmpty()
   @IsDefined()
   @ApiProperty()
-  longitude: string;
+  longitude: number;
 
   @IsNotEmpty()
   @IsDefined()
   @ApiProperty()
-  latitude: string;
+  latitude: number;
 
   @IsNotEmpty()
   @IsDefined()

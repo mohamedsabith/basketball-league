@@ -5,8 +5,9 @@ import { SuperadminController } from './superadmin.controller';
 import { User } from '../auth/entities/user.entity';
 import { Player } from '../player/entities/player.entity';
 import { LeagueAdmin } from '../league-admin/entities/league-admin.entity';
+import { Court } from './entities/court.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Player, LeagueAdmin])],
+  imports: [TypeOrmModule.forFeature([User, Player, LeagueAdmin, Court])],
   controllers: [SuperadminController],
   providers: [SuperadminService],
 })
