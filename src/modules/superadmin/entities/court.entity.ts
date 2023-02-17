@@ -1,4 +1,3 @@
-import { User } from 'src/modules/auth/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,12 +5,10 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
 
-@Entity('league')
-export class League {
+@Entity('court')
+export class Court {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -26,24 +23,20 @@ export class League {
   })
   image: string;
 
-  @Column({ type: 'date', nullable: false })
-  date: Date;
+  @Column('simple-array', { nullable: true, default: [] })
+  image_thumb: Date;
+
+  @Column({ nullable: false, type: 'decimal' })
+  longitude: number;
+
+  @Column({ nullable: false, type: 'decimal' })
+  latitude: number;
 
   @Column({ nullable: false })
-  time: string;
+  address: string;
 
-  @Column({ nullable: false })
-  duration: number;
-
-  @Column({ nullable: false })
-  entry_fee: number;
-
-  @Column({ nullable: false })
-  details: string;
-
-  @ManyToMany(() => User, { eager: true, cascade: true })
-  @JoinTable()
-  requestedUsers: User[];
+  @Column({ nullable: true })
+  zipcode: number;
 
   @CreateDateColumn({ name: 'createdate' })
   createdate: Date;

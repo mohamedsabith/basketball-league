@@ -16,4 +16,10 @@ export class SuperadminController {
   leagueAdminApproval(@Param('id') id: string) {
     return this.superadminService.leadueAdminApproval(id);
   }
+
+  // @ApiBearerAuth()
+  // @Post('court')
+  // @Roles(UserRole.SUPERADMIN)
+  // @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  // courtcreation() {}
 }

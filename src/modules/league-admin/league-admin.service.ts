@@ -90,4 +90,24 @@ export class LeagueAdminService {
     }
     return leagues;
   }
+
+  async leagueApproval(id, userId) {
+    const league = await this.leagueRepository.findOne({ where: { id } });
+    if (!league) {
+      throw new NotAcceptableException(LEAGUE_NOT_FOUND);
+    }
+
+    for (let i = 0; i < league.requestedUsers.length; i++) {
+      if (league.requestedUsers[i].id === userId.userId) {
+        if (league.requestedUsers[i].playerDetails.status === Status.APPROVED) {
+          throw new NotAcceptableException('this user already approved');
+        }
+        league.requestedUsers[i].playerDetails.status = Status.APPROVED;
+        await this.leagueRepository.save(league);
+        return `${league.requestedUsers[i].username} league approved`;
+      } else {
+        throw new NotAcceptableException('user not requested this league');
+      }
+    }
+  }
 }

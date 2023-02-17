@@ -106,4 +106,16 @@ export class LeagueAdminController {
   getAllLeague() {
     return this.leagueAdminService.getAllLeagues();
   }
+
+  @ApiBearerAuth()
+  @Post('league-approval/:id')
+  @Roles(UserRole.LEAGUEADMIN)
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  leagueApproval(
+    @Param()
+    id: LeagueParamDto,
+    @Body() userId: { userId: string },
+  ) {
+    return this.leagueAdminService.leagueApproval(id.id, userId);
+  }
 }
