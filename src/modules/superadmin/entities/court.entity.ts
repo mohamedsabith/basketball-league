@@ -24,7 +24,7 @@ export class Court {
   image: string;
 
   @Column('simple-array', { nullable: true, default: [] })
-  image_thumb: string;
+  image_thumb: string[];
 
   @Column({ nullable: false, type: 'decimal' })
   longitude: number;

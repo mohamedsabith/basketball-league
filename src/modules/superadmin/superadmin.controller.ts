@@ -5,13 +5,16 @@ import {
   Post,
   Body,
   UseInterceptors,
+  NotAcceptableException,
   UploadedFiles,
 } from '@nestjs/common';
+import * as path from 'path';
 import { SuperadminService } from './superadmin.service';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { Roles, UserRole } from 'src/common';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { CreateCourtDto } from './dto/create-court.dto';
+import { UpdateCourtDto } from './dto/update-court.dto';
 import { JwtAuthenticationGuard } from 'src/guards/jwt-authentication.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
@@ -36,7 +39,20 @@ export class SuperadminController {
         { name: 'image', maxCount: 1 },
         { name: 'thumb_image', maxCount: 4 },
       ],
-      { limits: { fileSize: 1024 * 1024 * 5 } },
+      {
+        limits: { fileSize: 1024 * 1024 * 5 },
+        fileFilter(req, file, callback) {
+          const ext = path.extname(file.originalname);
+          if (ext === '.png' || ext === '.jpeg' || ext === '.jpg') {
+            return callback(null, true);
+          }
+          req.fileValidationError = 'Invalid file type';
+          return callback(
+            new NotAcceptableException('Invalid file type'),
+            false,
+          );
+        },
+      },
     ),
   )
   @Roles(UserRole.SUPERADMIN)
@@ -49,8 +65,45 @@ export class SuperadminController {
     },
     @Body() courtData: CreateCourtDto,
   ) {
-    console.log(files);
+    return this.superadminService.courtcreation(courtData, files);
+  }
 
-    return this.superadminService.courtcreation(courtData);
+  @Post('court/:id')
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'thumb_image', maxCount: 4 },
+      ],
+      {
+        limits: { fileSize: 1024 * 1024 * 5 },
+        fileFilter(req, file, callback) {
+          const ext = path.extname(file.originalname);
+          if (ext === '.png' || ext === '.jpeg' || ext === '.jpg') {
+            return callback(null, true);
+          }
+          req.fileValidationError = 'Invalid file type';
+          return callback(
+            new NotAcceptableException('Invalid file type'),
+            false,
+          );
+        },
+      },
+    ),
+  )
+  @Roles(UserRole.SUPERADMIN)
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  updateCourt(
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      thumb_image?: Express.Multer.File[];
+    },
+    @Param('id') id: string,
+    @Body() courtData: UpdateCourtDto,
+  ) {
+    return this.superadminService.updateCourt(id, files, courtData);
   }
 }
