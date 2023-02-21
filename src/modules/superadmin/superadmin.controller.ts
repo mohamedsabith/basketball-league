@@ -7,6 +7,7 @@ import {
   UseInterceptors,
   NotAcceptableException,
   UploadedFiles,
+  Get,
 } from '@nestjs/common';
 import * as path from 'path';
 import { SuperadminService } from './superadmin.service';
@@ -55,6 +56,7 @@ export class SuperadminController {
       },
     ),
   )
+  @ApiBearerAuth()
   @Roles(UserRole.SUPERADMIN)
   @UseGuards(JwtAuthenticationGuard, RolesGuard)
   courtcreation(
@@ -105,5 +107,21 @@ export class SuperadminController {
     @Body() courtData: UpdateCourtDto,
   ) {
     return this.superadminService.updateCourt(id, files, courtData);
+  }
+
+  @Get('court/:id')
+  @Roles(UserRole.SUPERADMIN)
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  @ApiBearerAuth()
+  courtById(@Param('id') id: string) {
+    return this.superadminService.getCourtById(id);
+  }
+
+  @Get('court')
+  @Roles(UserRole.SUPERADMIN)
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  @ApiBearerAuth()
+  allCourts() {
+    return this.superadminService.getAllCourts();
   }
 }

@@ -56,12 +56,16 @@ export class SuperadminService {
       const image_thumb = await this.uploadImageToCloudinary(files.thumb_image);
       return await this.courtRepository.update(
         { id },
-        { ...courtData, image_thumb, image },
+        { ...courtData, image_thumb, image: image[0] },
       );
     }
     if (files.image) {
       const image = await this.uploadImageToCloudinary(files.image);
-      return await this.courtRepository.update({ id }, { ...courtData, image });
+
+      return await this.courtRepository.update(
+        { id },
+        { ...courtData, image: image[0] },
+      );
     }
     if (files.thumb_image) {
       const image_thumb = await this.uploadImageToCloudinary(files.thumb_image);
@@ -76,6 +80,14 @@ export class SuperadminService {
     const Court = await this.courtRepository.findOne({
       where: { id },
     });
+    if (!Court) {
+      throw new NotAcceptableException('Oops! Court Not Found');
+    }
+    return Court;
+  }
+
+  async getAllCourts() {
+    const Court = await this.courtRepository.find();
     if (!Court) {
       throw new NotAcceptableException('Oops! Court Not Found');
     }
