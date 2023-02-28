@@ -28,6 +28,7 @@ export class NotificationGateway
       { secret: process.env.JWT_ACCESS_TOKEN_SECRET },
     );
 
+    socket.handshake.query.email = user.email;
     socket.join(user.role);
   }
 

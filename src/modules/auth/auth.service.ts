@@ -266,10 +266,13 @@ export class AuthService {
       resetPasswordDto.password,
       PASSWORD_HASH_SALT,
     );
-    console.log(userId);
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
 
     (await this.notificationGateway.server.fetchSockets())
-      .filter((socket: any) => userId === socket.handshake.query.userId)
+      .filter((socket: any) => user.email === socket.handshake.query.email)
       .forEach((socket: any) =>
         socket.emit('notification', {
           message: 'Account password has been changed successfully!',
