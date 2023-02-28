@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { MailService } from '../../mail/mail.service';
 import { AuthController } from './auth.controller';
+import { NotificationGateway } from 'src/notification/notification.gateway';
 
 import { User } from './entities/user.entity';
 import { Player } from '../player/entities/player.entity';
@@ -28,6 +29,7 @@ import { JwtForgotPasswordStrategy } from './jwt/jwt-forgot-password-strategy';
     JwtRefreshStrategy,
     JwtForgotPasswordStrategy,
     MailService,
+    NotificationGateway,
   ],
   exports: [JwtStrategy, JwtRefreshStrategy, PassportModule],
 })

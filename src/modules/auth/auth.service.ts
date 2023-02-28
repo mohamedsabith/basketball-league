@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotificationGateway } from 'src/notification/notification.gateway';
 import {
   E_PASSWORD_INCORRECT,
   E_USER_EMAIL_TAKEN,
@@ -44,6 +45,7 @@ export class AuthService {
     private leagueAdminRepository: Repository<LeagueAdmin>,
     private jwtService: JwtService,
     private readonly mailService: MailService,
+    private notificationGateway: NotificationGateway,
   ) {}
 
   //Verify user Password
@@ -114,6 +116,13 @@ export class AuthService {
       password: hashedPassword,
       refresh_token: await bcrypt.hash(refreshToken, 10),
     });
+
+    this.notificationGateway.server.to(UserRole.SUPERADMIN).emit(
+      'notification',
+      JSON.stringify({
+        message: ` new user registered ${SignUpDto.username}`,
+      }),
+    );
 
     const { height, weight, school, zipcode } = SignUpDto;
 
@@ -257,6 +266,15 @@ export class AuthService {
       resetPasswordDto.password,
       PASSWORD_HASH_SALT,
     );
+    console.log(userId);
+
+    (await this.notificationGateway.server.fetchSockets())
+      .filter((socket: any) => userId === socket.handshake.query.userId)
+      .forEach((socket: any) =>
+        socket.emit('notification', {
+          message: 'Account password has been changed successfully!',
+        }),
+      );
 
     return await this.userRepository.update(
       { id: userId },

@@ -14,6 +14,9 @@ import { PlayerModule } from './modules/player/player.module';
 import { LeagueAdminModule } from './modules/league-admin/league-admin.module';
 import { SuperadminModule } from './modules/superadmin/superadmin.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { NotificationGateway } from './notification/notification.gateway';
+import { NotificationModule } from './notification/notification.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -35,6 +38,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    JwtModule.register({}),
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         transport: {
@@ -64,9 +68,10 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     LeagueAdminModule,
     SuperadminModule,
     CloudinaryModule,
+    NotificationModule,
   ],
   controllers: [AppController],
-  providers: [AppService, MailService],
+  providers: [AppService, MailService, NotificationGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
